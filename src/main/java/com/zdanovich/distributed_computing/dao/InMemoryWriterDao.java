@@ -29,6 +29,13 @@ public class InMemoryWriterDao {
     public Optional<Writer> findById(long id) {
         return Optional.ofNullable(writers.get(id));
     }
+    public Optional<Writer> findByLogin(String login) {
+        return writers.values()
+                .stream()
+                .filter(writer -> writer.getLogin().equals(login))
+                .findFirst();
+    }
+
 
     public void deleteById(long id) {
         writers.remove(id);

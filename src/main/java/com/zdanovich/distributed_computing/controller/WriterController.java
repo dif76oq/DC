@@ -2,6 +2,7 @@ package com.zdanovich.distributed_computing.controller;
 
 import com.zdanovich.distributed_computing.dto.request.WriterRequestTo;
 import com.zdanovich.distributed_computing.dto.response.WriterResponseTo;
+import com.zdanovich.distributed_computing.exception.DuplicateFieldException;
 import com.zdanovich.distributed_computing.exception.EntityNotFoundException;
 import com.zdanovich.distributed_computing.service.WriterService;
 import com.zdanovich.distributed_computing.validation.groups.OnCreateOrUpdate;
@@ -44,6 +45,16 @@ public class WriterController {
         }
     }
 
+    @GetMapping("/by-issue/{issueId}")
+    public ResponseEntity<?> findByIssueId(@PathVariable long issueId) {
+        try {
+            WriterResponseTo response = writerService.findByIssueId(issueId);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+
     @PostMapping
     public ResponseEntity<?> save(@RequestBody @Validated(OnCreateOrUpdate.class) WriterRequestTo writerRequestTo, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
@@ -53,8 +64,11 @@ public class WriterController {
             );
             return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
         }
-
-        return new ResponseEntity<>(writerService.save(writerRequestTo), HttpStatus.CREATED);
+        try {
+            return new ResponseEntity<>(writerService.save(writerRequestTo), HttpStatus.CREATED);
+        } catch (DuplicateFieldException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
     }
 
     @PutMapping
@@ -73,6 +87,8 @@ public class WriterController {
             return new ResponseEntity<>(updatedWriter, HttpStatus.OK);
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (DuplicateFieldException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
 
@@ -92,6 +108,8 @@ public class WriterController {
             return new ResponseEntity<>(updatedWriter, HttpStatus.OK);
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (DuplicateFieldException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
 
     }

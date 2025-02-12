@@ -36,6 +36,7 @@ public class IssueService {
         Issue issue = issueDao.findById(id).orElseThrow(() -> new EntityNotFoundException("This issue doesn't exist."));
         return convertToResponse(issue);
     }
+    
 
     public IssueResponseTo save(IssueRequestTo issueRequestTo) {
         Issue issue = convertToIssue(issueRequestTo);

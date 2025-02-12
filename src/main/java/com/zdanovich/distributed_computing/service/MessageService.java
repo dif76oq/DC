@@ -41,6 +41,13 @@ public class MessageService {
         return convertToResponse(message);
     }
 
+    public List<MessageResponseTo> findByIssueId(long issueId) {
+        return messageDao.findByIssueId(issueId)
+                .stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
+    }
+
     public MessageResponseTo save(MessageRequestTo messageRequestTo) {
         Message message = convertToMessage(messageRequestTo);
         messageDao.save(message);

@@ -2,8 +2,10 @@ package com.zdanovich.distributed_computing.controller;
 
 import com.zdanovich.distributed_computing.dto.request.IssueRequestTo;
 import com.zdanovich.distributed_computing.dto.response.IssueResponseTo;
+import com.zdanovich.distributed_computing.dto.response.MessageResponseTo;
 import com.zdanovich.distributed_computing.exception.EntityNotFoundException;
 import com.zdanovich.distributed_computing.service.IssueService;
+import com.zdanovich.distributed_computing.service.MessageService;
 import com.zdanovich.distributed_computing.validation.groups.OnCreateOrUpdate;
 import com.zdanovich.distributed_computing.validation.groups.OnPatch;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +24,12 @@ import java.util.Map;
 public class IssueController {
 
     private final IssueService issueService;
+    private final MessageService messageService;
 
     @Autowired
-    public IssueController(IssueService IssueService) {
+    public IssueController(IssueService IssueService, MessageService messageService) {
         this.issueService = IssueService;
+        this.messageService = messageService;
     }
 
 
@@ -42,6 +46,13 @@ public class IssueController {
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
+    }
+
+    @GetMapping("/{id}/messages")
+    public ResponseEntity<List<MessageResponseTo>> findMessagesByIssueId(@PathVariable long id) {
+
+        List<MessageResponseTo> messages = messageService.findByIssueId(id);
+        return new ResponseEntity<>(messages, HttpStatus.OK);
     }
 
     @PostMapping

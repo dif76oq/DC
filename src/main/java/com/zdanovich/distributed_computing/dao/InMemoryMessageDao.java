@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 @Repository
 public class InMemoryMessageDao {
@@ -25,6 +26,12 @@ public class InMemoryMessageDao {
 
     public List<Message> findAll() {
         return new ArrayList<>(messages.values());
+    }
+
+    public List<Message> findByIssueId(long issueId) {
+        return messages.values().stream()
+                .filter(message -> message.getIssueId() == issueId)
+                .collect(Collectors.toList());
     }
     public Optional<Message> findById(long id) {
         return Optional.ofNullable(messages.get(id));
