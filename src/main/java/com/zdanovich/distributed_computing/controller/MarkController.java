@@ -4,11 +4,13 @@ import com.zdanovich.distributed_computing.dto.request.MarkRequestTo;
 import com.zdanovich.distributed_computing.dto.response.MarkResponseTo;
 import com.zdanovich.distributed_computing.exception.EntityNotFoundException;
 import com.zdanovich.distributed_computing.service.MarkService;
+import com.zdanovich.distributed_computing.validation.groups.OnCreateOrUpdate;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -43,7 +45,7 @@ public class MarkController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<?> save(@RequestBody @Valid MarkRequestTo markRequestTo, BindingResult bindingResult) {
+    public ResponseEntity<?> save(@RequestBody @Validated(OnCreateOrUpdate.class) MarkRequestTo markRequestTo, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
             bindingResult.getFieldErrors().forEach(error ->
@@ -57,7 +59,7 @@ public class MarkController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable long id,
-                                    @RequestBody @Valid MarkRequestTo markRequestTo,
+                                    @RequestBody @Validated(OnCreateOrUpdate.class) MarkRequestTo markRequestTo,
                                     BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();

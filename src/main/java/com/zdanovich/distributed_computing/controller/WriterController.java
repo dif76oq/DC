@@ -4,11 +4,14 @@ import com.zdanovich.distributed_computing.dto.request.WriterRequestTo;
 import com.zdanovich.distributed_computing.dto.response.WriterResponseTo;
 import com.zdanovich.distributed_computing.exception.EntityNotFoundException;
 import com.zdanovich.distributed_computing.service.WriterService;
+import com.zdanovich.distributed_computing.validation.groups.OnCreateOrUpdate;
+import com.zdanovich.distributed_computing.validation.groups.OnPatch;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -42,7 +45,7 @@ public class WriterController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<?> save(@RequestBody @Valid WriterRequestTo writerRequestTo, BindingResult bindingResult) {
+    public ResponseEntity<?> save(@RequestBody @Validated(OnCreateOrUpdate.class) WriterRequestTo writerRequestTo, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
             bindingResult.getFieldErrors().forEach(error ->
@@ -56,7 +59,7 @@ public class WriterController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable long id,
-                                    @RequestBody @Valid WriterRequestTo writerRequestTo,
+                                    @RequestBody @Validated(OnCreateOrUpdate.class) WriterRequestTo writerRequestTo,
                                     BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
@@ -76,7 +79,7 @@ public class WriterController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<?> partialUpdate(@PathVariable long id,
-                                           @RequestBody WriterRequestTo writerRequestTo,
+                                           @RequestBody @Validated(OnPatch.class) WriterRequestTo writerRequestTo,
                                            BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();

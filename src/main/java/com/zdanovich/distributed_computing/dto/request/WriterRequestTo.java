@@ -1,5 +1,7 @@
 package com.zdanovich.distributed_computing.dto.request;
 
+import com.zdanovich.distributed_computing.validation.groups.OnCreateOrUpdate;
+import com.zdanovich.distributed_computing.validation.groups.OnPatch;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -7,19 +9,19 @@ import jakarta.validation.constraints.Size;
 
 public class WriterRequestTo {
 
-    @NotBlank(message = "Email can't be empty")
-    @Email(message = "Email should be in format username@example.com")
-    @Size(min = 2, max = 64, message = "Login size must be between 2..64 characters")
+    @Email(message = "Email should be in format username@example.com", groups = {OnPatch.class, OnCreateOrUpdate.class})
+    @Size(min = 2, max = 64, message = "Login size must be between 2..64 characters", groups = {OnPatch.class, OnCreateOrUpdate.class})
+    @NotBlank(message = "Email can't be empty", groups = OnCreateOrUpdate.class)
     private String login;
 
-    @NotEmpty(message="Password can't be empty")
-    @Size(min = 8, max = 128, message = "Password must be between 8..128 characters")
+    @NotEmpty(message="Password can't be empty", groups = OnCreateOrUpdate.class)
+    @Size(min = 8, max = 128, message = "Password must be between 8..128 characters", groups = {OnPatch.class, OnCreateOrUpdate.class})
     private String password;
 
-    @Size(min = 2, max = 64, message = "Your firstname must be between 2..64 characters")
+    @Size(min = 2, max = 64, message = "Your firstname must be between 2..64 characters", groups = {OnPatch.class, OnCreateOrUpdate.class})
     private String firstname;
 
-    @Size(min = 2, max = 64, message = "Your lastname must be between 2..64 characters")
+    @Size(min = 2, max = 64, message = "Your lastname must be between 2..64 characters", groups = {OnPatch.class, OnCreateOrUpdate.class})
     private String lastname;
 
     public String getLogin() {

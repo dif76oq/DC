@@ -1,17 +1,12 @@
 package com.zdanovich.distributed_computing.model;
 
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Size;
 
 public class Message {
 
     private long id;
-
     private long issueId;
-
-    @Size(min = 2, max = 2048, message = "Content size must be between 2..64 characters")
-    @NotEmpty(message="Content can't be empty")
     private String content;
+
 
     public long getId() {
         return id;

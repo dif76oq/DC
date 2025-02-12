@@ -4,11 +4,14 @@ import com.zdanovich.distributed_computing.dto.request.IssueRequestTo;
 import com.zdanovich.distributed_computing.dto.response.IssueResponseTo;
 import com.zdanovich.distributed_computing.exception.EntityNotFoundException;
 import com.zdanovich.distributed_computing.service.IssueService;
+import com.zdanovich.distributed_computing.validation.groups.OnCreateOrUpdate;
+import com.zdanovich.distributed_computing.validation.groups.OnPatch;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -43,7 +46,7 @@ public class IssueController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<?> save(@RequestBody @Valid IssueRequestTo issueRequestTo, BindingResult bindingResult) {
+    public ResponseEntity<?> save(@RequestBody @Validated(OnCreateOrUpdate.class) IssueRequestTo issueRequestTo, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
             bindingResult.getFieldErrors().forEach(error ->
@@ -57,7 +60,7 @@ public class IssueController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable long id,
-                                    @RequestBody @Valid IssueRequestTo issueRequestTo,
+                                    @RequestBody @Validated(OnCreateOrUpdate.class) IssueRequestTo issueRequestTo,
                                     BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
@@ -77,7 +80,7 @@ public class IssueController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<?> partialUpdate(@PathVariable long id,
-                                           @RequestBody IssueRequestTo issueRequestTo,
+                                           @RequestBody @Validated(OnPatch.class) IssueRequestTo issueRequestTo,
                                            BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
