@@ -43,19 +43,19 @@ public class WriterService {
         return convertToResponse(writer);
     }
 
-    public WriterResponseTo update(long id, WriterRequestTo writerRequestTo) throws EntityNotFoundException {
-        writerDao.findById(id).orElseThrow(() -> new EntityNotFoundException("This writer doesn't exist."));
+    public WriterResponseTo update(WriterRequestTo writerRequestTo) throws EntityNotFoundException {
+        writerDao.findById(writerRequestTo.getId()).orElseThrow(() -> new EntityNotFoundException("This writer doesn't exist."));
 
         Writer updatedWriter = convertToWriter(writerRequestTo);
-        updatedWriter.setId(id);
+        updatedWriter.setId(writerRequestTo.getId());
         writerDao.save(updatedWriter);
 
         return convertToResponse(updatedWriter);
     }
 
-    public WriterResponseTo partialUpdate(long id, WriterRequestTo writerRequestTo) throws EntityNotFoundException {
+    public WriterResponseTo partialUpdate(WriterRequestTo writerRequestTo) throws EntityNotFoundException {
 
-        Writer writer = writerDao.findById(id).orElseThrow(() -> new EntityNotFoundException("Writer not found"));
+        Writer writer = writerDao.findById(writerRequestTo.getId()).orElseThrow(() -> new EntityNotFoundException("Writer not found"));
 
         if (writerRequestTo.getFirstname() != null) {
             writer.setFirstname(writerRequestTo.getFirstname());
@@ -75,7 +75,8 @@ public class WriterService {
         return convertToResponse(writer);
     }
 
-    public void delete(long id) {
+    public void delete(long id) throws EntityNotFoundException {
+        writerDao.findById(id).orElseThrow(() -> new EntityNotFoundException("This writer doesn't exist."));
         writerDao.deleteById(id);
     }
 

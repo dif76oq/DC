@@ -2,14 +2,14 @@ package com.zdanovich.distributed_computing.dto.request;
 
 import com.zdanovich.distributed_computing.validation.groups.OnCreateOrUpdate;
 import com.zdanovich.distributed_computing.validation.groups.OnPatch;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 
 public class WriterRequestTo {
 
-    @Email(message = "Email should be in format username@example.com", groups = {OnPatch.class, OnCreateOrUpdate.class})
+    private long id;
+
     @Size(min = 2, max = 64, message = "Login size must be between 2..64 characters", groups = {OnPatch.class, OnCreateOrUpdate.class})
     @NotBlank(message = "Email can't be empty", groups = OnCreateOrUpdate.class)
     private String login;
@@ -53,5 +53,13 @@ public class WriterRequestTo {
     }
     public void setLastname(String lastname) {
         this.lastname = lastname;
+    }
+
+
+    public long getId() {
+        return id;
+    }
+    public void setId(long id) {
+        this.id = id;
     }
 }

@@ -29,7 +29,7 @@ public class WriterController {
         this.writerService = writerService;
     }
 
-    @GetMapping("")
+    @GetMapping
     public ResponseEntity<List<WriterResponseTo>> findAll() {
         return new ResponseEntity<>(writerService.findAll(), HttpStatus.OK);
     }
@@ -44,7 +44,7 @@ public class WriterController {
         }
     }
 
-    @PostMapping("/create")
+    @PostMapping
     public ResponseEntity<?> save(@RequestBody @Validated(OnCreateOrUpdate.class) WriterRequestTo writerRequestTo, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
@@ -57,9 +57,8 @@ public class WriterController {
         return new ResponseEntity<>(writerService.save(writerRequestTo), HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<?> update(@PathVariable long id,
-                                    @RequestBody @Validated(OnCreateOrUpdate.class) WriterRequestTo writerRequestTo,
+    @PutMapping
+    public ResponseEntity<?> update(@RequestBody @Validated(OnCreateOrUpdate.class) WriterRequestTo writerRequestTo,
                                     BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
@@ -70,7 +69,7 @@ public class WriterController {
         }
 
         try {
-            WriterResponseTo updatedWriter = writerService.update(id, writerRequestTo);
+            WriterResponseTo updatedWriter = writerService.update(writerRequestTo);
             return new ResponseEntity<>(updatedWriter, HttpStatus.OK);
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
@@ -78,8 +77,7 @@ public class WriterController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<?> partialUpdate(@PathVariable long id,
-                                           @RequestBody @Validated(OnPatch.class) WriterRequestTo writerRequestTo,
+    public ResponseEntity<?> partialUpdate(@RequestBody @Validated(OnPatch.class) WriterRequestTo writerRequestTo,
                                            BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
@@ -90,7 +88,7 @@ public class WriterController {
         }
 
         try {
-            WriterResponseTo updatedWriter = writerService.partialUpdate(id, writerRequestTo);
+            WriterResponseTo updatedWriter = writerService.partialUpdate(writerRequestTo);
             return new ResponseEntity<>(updatedWriter, HttpStatus.OK);
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
@@ -99,9 +97,14 @@ public class WriterController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity delete(@PathVariable long id) {
-        writerService.delete(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    public ResponseEntity<?> delete(@PathVariable long id) {
+        try {
+            writerService.delete(id);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
     }
 
 }

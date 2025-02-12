@@ -6,7 +6,6 @@ import com.zdanovich.distributed_computing.exception.EntityNotFoundException;
 import com.zdanovich.distributed_computing.service.IssueService;
 import com.zdanovich.distributed_computing.validation.groups.OnCreateOrUpdate;
 import com.zdanovich.distributed_computing.validation.groups.OnPatch;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +29,7 @@ public class IssueController {
     }
 
 
-    @GetMapping("")
+    @GetMapping
     public ResponseEntity<List<IssueResponseTo>> findAll() {
         return new ResponseEntity<>(issueService.findAll(), HttpStatus.OK);
     }
@@ -45,7 +44,7 @@ public class IssueController {
         }
     }
 
-    @PostMapping("/create")
+    @PostMapping
     public ResponseEntity<?> save(@RequestBody @Validated(OnCreateOrUpdate.class) IssueRequestTo issueRequestTo, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
@@ -58,9 +57,8 @@ public class IssueController {
         return new ResponseEntity<>(issueService.save(issueRequestTo), HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<?> update(@PathVariable long id,
-                                    @RequestBody @Validated(OnCreateOrUpdate.class) IssueRequestTo issueRequestTo,
+    @PutMapping
+    public ResponseEntity<?> update(@RequestBody @Validated(OnCreateOrUpdate.class) IssueRequestTo issueRequestTo,
                                     BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
@@ -71,16 +69,15 @@ public class IssueController {
         }
 
         try {
-            IssueResponseTo updatedIssue = issueService.update(id, issueRequestTo);
+            IssueResponseTo updatedIssue = issueService.update(issueRequestTo);
             return new ResponseEntity<>(updatedIssue, HttpStatus.OK);
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
 
-    @PatchMapping("/{id}")
-    public ResponseEntity<?> partialUpdate(@PathVariable long id,
-                                           @RequestBody @Validated(OnPatch.class) IssueRequestTo issueRequestTo,
+    @PatchMapping
+    public ResponseEntity<?> partialUpdate(@RequestBody @Validated(OnPatch.class) IssueRequestTo issueRequestTo,
                                            BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
@@ -91,7 +88,7 @@ public class IssueController {
         }
 
         try {
-            IssueResponseTo updatedIssue = issueService.partialUpdate(id, issueRequestTo);
+            IssueResponseTo updatedIssue = issueService.partialUpdate(issueRequestTo);
             return new ResponseEntity<>(updatedIssue, HttpStatus.OK);
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
@@ -100,8 +97,12 @@ public class IssueController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity delete(@PathVariable long id) {
-        issueService.delete(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    public ResponseEntity<?> delete(@PathVariable long id) {
+        try {
+            issueService.delete(id);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 }

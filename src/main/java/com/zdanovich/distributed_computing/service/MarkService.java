@@ -43,18 +43,17 @@ public class MarkService {
         return convertToResponse(mark);
     }
 
-    public MarkResponseTo update(long id, MarkRequestTo markRequestTo) throws EntityNotFoundException{
-        markDao.findById(id).orElseThrow(() -> new EntityNotFoundException("This mark doesn't exist."));
+    public MarkResponseTo update(MarkRequestTo markRequestTo) throws EntityNotFoundException{
+        markDao.findById(markRequestTo.getId()).orElseThrow(() -> new EntityNotFoundException("This mark doesn't exist."));
 
         Mark updatedMark = convertToMark(markRequestTo);
-        updatedMark.setId(id);
-
         markDao.save(updatedMark);
 
         return convertToResponse(updatedMark);
     }
 
     public void delete(long id) {
+        markDao.findById(id).orElseThrow(() -> new EntityNotFoundException("Mark doesn't exist."));
         markDao.deleteById(id);
     }
 

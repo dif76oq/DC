@@ -45,11 +45,11 @@ public class IssueService {
         return convertToResponse(issue);
     }
 
-    public IssueResponseTo update(long id, IssueRequestTo issueRequestTo) throws EntityNotFoundException{
-        Issue existingIssue = issueDao.findById(id).orElseThrow(() -> new EntityNotFoundException("This issue doesn't exist."));
+    public IssueResponseTo update(IssueRequestTo issueRequestTo) throws EntityNotFoundException{
+        Issue existingIssue = issueDao.findById(issueRequestTo.getId()).orElseThrow(() -> new EntityNotFoundException("This issue doesn't exist."));
 
         Issue updatedIssue = convertToIssue(issueRequestTo);
-        updatedIssue.setId(id);
+        updatedIssue.setId(issueRequestTo.getId());
         updatedIssue.setCreated(existingIssue.getCreated());
         updatedIssue.setModified(new Date());
 
@@ -58,8 +58,8 @@ public class IssueService {
         return convertToResponse(updatedIssue);
     }
 
-    public IssueResponseTo partialUpdate(long id, IssueRequestTo issueRequestTo) throws EntityNotFoundException{
-        Issue issue = issueDao.findById(id).orElseThrow(() -> new EntityNotFoundException("This issue doesn't exist."));
+    public IssueResponseTo partialUpdate(IssueRequestTo issueRequestTo) throws EntityNotFoundException{
+        Issue issue = issueDao.findById(issueRequestTo.getId()).orElseThrow(() -> new EntityNotFoundException("This issue doesn't exist."));
 
         if (issueRequestTo.getContent() != null) {
             issue.setContent(issueRequestTo.getContent());
@@ -77,7 +77,8 @@ public class IssueService {
         return convertToResponse(issue);
     }
 
-    public void delete(long id) {
+    public void delete(long id) throws EntityNotFoundException {
+        issueDao.findById(id).orElseThrow(() -> new EntityNotFoundException("Issue doesn't exist."));
         issueDao.deleteById(id);
     }
 

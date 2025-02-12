@@ -31,10 +31,4 @@ public class Message {
         this.content = content;
     }
 
-
-    public Message(long id, long issueId, String content) {
-        this.id = id;
-        this.issueId = issueId;
-        this.content = content;
-    }
 }

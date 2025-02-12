@@ -2,11 +2,15 @@ package com.zdanovich.distributed_computing.dto.response;
 
 public class WriterResponseTo {
 
+    private long id;
+
     private String login;
 
     private String firstname;
 
     private String lastname;
+
+    private String password;
 
 
     public String getLogin() {
@@ -30,5 +34,20 @@ public class WriterResponseTo {
     }
     public void setLastname(String lastname) {
         this.lastname = lastname;
+    }
+
+    public long getId() {
+        return id;
+    }
+    public void setId(long id) {
+        this.id = id;
+    }
+
+
+    public String getPassword() {
+        return password;
+    }
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

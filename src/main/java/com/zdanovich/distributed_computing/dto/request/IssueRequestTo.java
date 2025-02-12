@@ -7,7 +7,8 @@ import jakarta.validation.constraints.Size;
 
 public class IssueRequestTo {
 
-    @NotBlank(message="WriterId can't be empty", groups = OnCreateOrUpdate.class)
+    private long id;
+
     private long writerId;
 
     @Size(min = 2, max = 64, message = "Title size must be between 2..64 characters", groups = {OnPatch.class, OnCreateOrUpdate.class})
@@ -17,6 +18,7 @@ public class IssueRequestTo {
     @Size(min = 4, max = 2048, message = "Content size must be between 2..64 characters", groups = {OnPatch.class, OnCreateOrUpdate.class})
     @NotBlank(message="Content can't be empty", groups = OnCreateOrUpdate.class)
     private String content;
+
 
     public long getWriterId() {
         return writerId;
@@ -39,5 +41,13 @@ public class IssueRequestTo {
     }
     public void setContent(String content) {
         this.content = content;
+    }
+
+
+    public long getId() {
+        return id;
+    }
+    public void setId(long id) {
+        this.id = id;
     }
 }

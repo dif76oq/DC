@@ -7,7 +7,8 @@ import jakarta.validation.constraints.Size;
 
 public class MessageRequestTo {
 
-    @NotBlank(message="Issue ID can't be empty", groups = OnCreateOrUpdate.class)
+    private long id;
+
     private long issueId;
 
     @Size(min = 2, max = 2048, message = "Content size must be between 2..64 characters", groups = {OnPatch.class, OnCreateOrUpdate.class})
@@ -27,5 +28,13 @@ public class MessageRequestTo {
     }
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 }

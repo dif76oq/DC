@@ -57,14 +57,4 @@ public class Issue {
     public void setModified(Date modified) {
         this.modified = modified;
     }
-
-
-
-    public Issue(long writerId, String title, String content, Date created, Date modified) {
-        this.writerId = writerId;
-        this.title = title;
-        this.content = content;
-        this.created = created;
-        this.modified = modified;
-    }
 }

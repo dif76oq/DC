@@ -2,8 +2,8 @@ package com.zdanovich.distributed_computing.dto.response;
 
 public class MessageResponseTo {
 
+    private long id;
     private long issueId;
-
     private String content;
 
 
@@ -20,5 +20,13 @@ public class MessageResponseTo {
     }
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 }

@@ -4,6 +4,8 @@ import java.util.Date;
 
 public class IssueResponseTo {
 
+    private long id;
+
     private long writerId;
 
     private String title;
@@ -51,5 +53,13 @@ public class IssueResponseTo {
     }
     public void setModified(Date modified) {
         this.modified = modified;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 }

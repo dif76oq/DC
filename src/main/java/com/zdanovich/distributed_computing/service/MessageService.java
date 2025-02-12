@@ -47,19 +47,19 @@ public class MessageService {
         return convertToResponse(message);
     }
 
-    public MessageResponseTo update(long id, MessageRequestTo messageRequestTo) throws EntityNotFoundException {
-        messageDao.findById(id).orElseThrow(() -> new EntityNotFoundException("This message doesn't exist."));
+    public MessageResponseTo update(MessageRequestTo messageRequestTo) throws EntityNotFoundException {
+        messageDao.findById(messageRequestTo.getId()).orElseThrow(() -> new EntityNotFoundException("This message doesn't exist."));
 
         Message updatedMessage = convertToMessage(messageRequestTo);
-        updatedMessage.setId(id);
+        updatedMessage.setId(messageRequestTo.getId());
         messageDao.save(updatedMessage);
 
         return convertToResponse(updatedMessage);
     }
 
-    public MessageResponseTo partialUpdate(long id, MessageRequestTo messageRequestTo) throws EntityNotFoundException {
+    public MessageResponseTo partialUpdate(MessageRequestTo messageRequestTo) throws EntityNotFoundException {
 
-        Message message = messageDao.findById(id).orElseThrow(() -> new EntityNotFoundException("Message not found"));
+        Message message = messageDao.findById(messageRequestTo.getId()).orElseThrow(() -> new EntityNotFoundException("Message not found"));
 
         if (messageRequestTo.getContent() != null) {
             message.setContent(messageRequestTo.getContent());
@@ -73,7 +73,8 @@ public class MessageService {
         return convertToResponse(message);
     }
 
-    public void delete(long id) {
+    public void delete(long id) throws EntityNotFoundException {
+        messageDao.findById(id).orElseThrow(() -> new EntityNotFoundException("Message doesn't exist."));
         messageDao.deleteById(id);
     }
 

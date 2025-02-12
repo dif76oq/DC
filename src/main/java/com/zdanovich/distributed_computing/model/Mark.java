@@ -21,9 +21,4 @@ public class Mark {
         this.name = name;
     }
 
-
-    public Mark(long id, String name) {
-        this.id = id;
-        this.name = name;
-    }
 }

@@ -29,7 +29,7 @@ public class MarkController {
     }
 
 
-    @GetMapping("")
+    @GetMapping
     public ResponseEntity<List<MarkResponseTo>> findAll() {
         return new ResponseEntity<>(markService.findAll(), HttpStatus.OK);
     }
@@ -44,7 +44,7 @@ public class MarkController {
         }
     }
 
-    @PostMapping("/create")
+    @PostMapping
     public ResponseEntity<?> save(@RequestBody @Validated(OnCreateOrUpdate.class) MarkRequestTo markRequestTo, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
@@ -57,9 +57,8 @@ public class MarkController {
         return new ResponseEntity<>(markService.save(markRequestTo), HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<?> update(@PathVariable long id,
-                                    @RequestBody @Validated(OnCreateOrUpdate.class) MarkRequestTo markRequestTo,
+    @PutMapping
+    public ResponseEntity<?> update(@RequestBody @Validated(OnCreateOrUpdate.class) MarkRequestTo markRequestTo,
                                     BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
@@ -70,7 +69,7 @@ public class MarkController {
         }
 
         try {
-            MarkResponseTo updatedMark = markService.update(id, markRequestTo);
+            MarkResponseTo updatedMark = markService.update(markRequestTo);
             return new ResponseEntity<>(updatedMark, HttpStatus.OK);
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
@@ -79,8 +78,12 @@ public class MarkController {
 
 
     @DeleteMapping("/{id}")
-    public ResponseEntity delete(@PathVariable long id) {
-        markService.delete(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    public ResponseEntity<?> delete(@PathVariable long id) {
+        try {
+            markService.delete(id);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 }
