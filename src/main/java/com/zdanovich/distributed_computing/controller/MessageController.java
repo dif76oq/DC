@@ -2,6 +2,7 @@ package com.zdanovich.distributed_computing.controller;
 
 import com.zdanovich.distributed_computing.dto.request.MessageRequestTo;
 import com.zdanovich.distributed_computing.dto.response.MessageResponseTo;
+import com.zdanovich.distributed_computing.exception.DuplicateFieldException;
 import com.zdanovich.distributed_computing.exception.EntityNotFoundException;
 import com.zdanovich.distributed_computing.service.MessageService;
 import com.zdanovich.distributed_computing.validation.groups.OnCreateOrUpdate;
@@ -54,8 +55,11 @@ public class MessageController {
             );
             return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
         }
-
-        return new ResponseEntity<>(messageService.save(messageRequestTo), HttpStatus.CREATED);
+        try {
+            return new ResponseEntity<>(messageService.save(messageRequestTo), HttpStatus.CREATED);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>("{}", HttpStatus.NOT_FOUND);
+        }
     }
 
     @PutMapping

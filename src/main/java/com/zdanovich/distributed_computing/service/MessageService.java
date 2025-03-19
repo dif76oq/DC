@@ -1,12 +1,16 @@
 package com.zdanovich.distributed_computing.service;
 
-import com.zdanovich.distributed_computing.dao.InMemoryMessageDao;
+import com.zdanovich.distributed_computing.dto.request.IssueRequestTo;
 import com.zdanovich.distributed_computing.dto.request.MessageRequestTo;
 
 import com.zdanovich.distributed_computing.dto.response.MessageResponseTo;
 import com.zdanovich.distributed_computing.exception.EntityNotFoundException;
+import com.zdanovich.distributed_computing.model.Issue;
 import com.zdanovich.distributed_computing.model.Message;
 
+import com.zdanovich.distributed_computing.model.Writer;
+import com.zdanovich.distributed_computing.repository.IssueRepository;
+import com.zdanovich.distributed_computing.repository.MessageRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,77 +23,88 @@ import java.util.stream.Collectors;
 public class MessageService {
 
     private final ModelMapper modelMapper;
-    private final InMemoryMessageDao messageDao;
+    private final MessageRepository messageRepository;
+    private final IssueRepository issueRepository;
 
     @Autowired
-    public MessageService(ModelMapper modelMapper, InMemoryMessageDao messageDao) {
+    public MessageService(ModelMapper modelMapper, MessageRepository messageRepository, IssueRepository issueRepository) {
         this.modelMapper = modelMapper;
-        this.messageDao = messageDao;
+        this.messageRepository = messageRepository;
+        this.issueRepository = issueRepository;
     }
 
 
     public List<MessageResponseTo> findAll() {
-        return messageDao.findAll()
+        return messageRepository.findAll()
                 .stream()
                 .map(this::convertToResponse)
                 .collect(Collectors.toList());
     }
 
     public MessageResponseTo findById(long id) throws EntityNotFoundException {
-        Message message = messageDao.findById(id).orElseThrow(() -> new EntityNotFoundException("This message doesn't exist."));
+        Message message = messageRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("This message doesn't exist."));
 
         return convertToResponse(message);
     }
 
     public List<MessageResponseTo> findByIssueId(long issueId) {
-        return messageDao.findByIssueId(issueId)
+        return messageRepository.findByIssueId(issueId)
                 .stream()
                 .map(this::convertToResponse)
                 .collect(Collectors.toList());
     }
 
-    public MessageResponseTo save(MessageRequestTo messageRequestTo) {
+    public MessageResponseTo save(MessageRequestTo messageRequestTo) throws EntityNotFoundException{
         Message message = convertToMessage(messageRequestTo);
-        messageDao.save(message);
+        messageRepository.save(message);
         return convertToResponse(message);
     }
 
     public MessageResponseTo update(MessageRequestTo messageRequestTo) throws EntityNotFoundException {
-        messageDao.findById(messageRequestTo.getId()).orElseThrow(() -> new EntityNotFoundException("This message doesn't exist."));
+        messageRepository.findById(messageRequestTo.getId()).orElseThrow(() -> new EntityNotFoundException("This message doesn't exist."));
 
         Message updatedMessage = convertToMessage(messageRequestTo);
         updatedMessage.setId(messageRequestTo.getId());
-        messageDao.save(updatedMessage);
+        messageRepository.save(updatedMessage);
 
         return convertToResponse(updatedMessage);
     }
 
     public MessageResponseTo partialUpdate(MessageRequestTo messageRequestTo) throws EntityNotFoundException {
 
-        Message message = messageDao.findById(messageRequestTo.getId()).orElseThrow(() -> new EntityNotFoundException("Message not found"));
+        Message message = messageRepository.findById(messageRequestTo.getId()).orElseThrow(() -> new EntityNotFoundException("Message not found"));
 
         if (messageRequestTo.getContent() != null) {
             message.setContent(messageRequestTo.getContent());
         }
         if (messageRequestTo.getIssueId() != 0) {
-            message.setIssueId(messageRequestTo.getIssueId());
+            Issue issue = issueRepository.findById(messageRequestTo.getIssueId()).get();
+            message.setIssue(issue);
         }
 
-        messageDao.save(message);
+        messageRepository.save(message);
 
         return convertToResponse(message);
     }
 
     public void delete(long id) throws EntityNotFoundException {
-        messageDao.findById(id).orElseThrow(() -> new EntityNotFoundException("Message doesn't exist."));
-        messageDao.deleteById(id);
+        messageRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Message doesn't exist."));
+        messageRepository.deleteById(id);
     }
 
-    private Message convertToMessage(MessageRequestTo messageRequestTo) {
-        return this.modelMapper.map(messageRequestTo, Message.class);
+    private Message convertToMessage(MessageRequestTo messageRequestTo) throws EntityNotFoundException{
+        Message message = modelMapper.map(messageRequestTo, Message.class);
+        if (messageRequestTo.getIssueId() != 0) {
+            Issue issue = issueRepository.findById(messageRequestTo.getIssueId())
+                    .orElseThrow(() -> new EntityNotFoundException("Writer not found with id: " + messageRequestTo.getIssueId()));
+            message.setIssue(issue);
+        }
+
+        return message;
     }
 
-    private MessageResponseTo convertToResponse(Message message) {
+
+    public MessageResponseTo convertToResponse(Message message) {
         return this.modelMapper.map(message, MessageResponseTo.class);
     }
 }

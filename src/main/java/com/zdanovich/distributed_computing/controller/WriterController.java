@@ -7,9 +7,9 @@ import com.zdanovich.distributed_computing.exception.EntityNotFoundException;
 import com.zdanovich.distributed_computing.service.WriterService;
 import com.zdanovich.distributed_computing.validation.groups.OnCreateOrUpdate;
 import com.zdanovich.distributed_computing.validation.groups.OnPatch;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
@@ -67,7 +67,7 @@ public class WriterController {
         try {
             return new ResponseEntity<>(writerService.save(writerRequestTo), HttpStatus.CREATED);
         } catch (DuplicateFieldException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+            return new ResponseEntity<>("{}", HttpStatus.FORBIDDEN);
         }
     }
 

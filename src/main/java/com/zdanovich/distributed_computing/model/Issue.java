@@ -1,15 +1,38 @@
 package com.zdanovich.distributed_computing.model;
 
-import java.util.Date;
+import jakarta.persistence.*;
 
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+
+@Entity
+@Table(name="tbl_issue")
 public class Issue {
 
+    @Id()
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    private long writerId;
+
+    @ManyToOne
+    @JoinColumn(name="writer_id")
+    private Writer writer;
+
     private String title;
     private String content;
     private Date created;
     private Date modified;
+
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "tbl_issue_mark",
+            joinColumns = @JoinColumn(name = "issue_id"),
+            inverseJoinColumns = @JoinColumn(name = "mark_id")
+    )
+    private Set<Mark> marks;
+
+    @OneToMany(mappedBy = "issue")
+    private List<Message> messages;
 
 
     public long getId() {
@@ -20,11 +43,11 @@ public class Issue {
     }
 
 
-    public long getWriterId() {
-        return writerId;
+    public Writer getWriter() {
+        return writer;
     }
-    public void setWriterId(long writerId) {
-        this.writerId = writerId;
+    public void setWriter(Writer writer) {
+        this.writer = writer;
     }
 
 
@@ -56,5 +79,13 @@ public class Issue {
     }
     public void setModified(Date modified) {
         this.modified = modified;
+    }
+
+
+    public Set<Mark> getMarks() {
+        return marks;
+    }
+    public void setMarks(Set<Mark> marks) {
+        this.marks = marks;
     }
 }

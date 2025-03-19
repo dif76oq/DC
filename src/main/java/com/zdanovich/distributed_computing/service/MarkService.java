@@ -1,10 +1,11 @@
 package com.zdanovich.distributed_computing.service;
 
-import com.zdanovich.distributed_computing.dao.InMemoryMarkDao;
 import com.zdanovich.distributed_computing.dto.request.MarkRequestTo;
 import com.zdanovich.distributed_computing.dto.response.MarkResponseTo;
+import com.zdanovich.distributed_computing.exception.DuplicateFieldException;
 import com.zdanovich.distributed_computing.exception.EntityNotFoundException;
 import com.zdanovich.distributed_computing.model.Mark;
+import com.zdanovich.distributed_computing.repository.MarkRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,52 +17,62 @@ import java.util.stream.Collectors;
 public class MarkService {
 
     private final ModelMapper modelMapper;
-    private final InMemoryMarkDao markDao;
+    private final MarkRepository markRepository;
 
     @Autowired
-    public MarkService(ModelMapper modelMapper, InMemoryMarkDao markDao) {
+    public MarkService(ModelMapper modelMapper, MarkRepository markRepository) {
         this.modelMapper = modelMapper;
-        this.markDao = markDao;
+        this.markRepository = markRepository;
     }
 
     public List<MarkResponseTo> findAll() {
-        return markDao.findAll()
+        return markRepository.findAll()
                 .stream()
                 .map(this::convertToResponse)
                 .collect(Collectors.toList());
     }
 
     public MarkResponseTo findById(long id) throws EntityNotFoundException {
-        Mark mark = markDao.findById(id).orElseThrow(() -> new EntityNotFoundException("This writer doesn't exist."));
+        Mark mark = markRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("This mark doesn't exist."));
 
         return convertToResponse(mark);
     }
 
-    public MarkResponseTo save(MarkRequestTo markRequestTo) {
+    public MarkResponseTo save(MarkRequestTo markRequestTo) throws DuplicateFieldException {
+        if (markRepository.findByName(markRequestTo.getName()).isPresent()) {
+            throw new DuplicateFieldException("name", markRequestTo.getName());
+        }
+
         Mark mark = convertToMark(markRequestTo);
-        markDao.save(mark);
+        markRepository.save(mark);
         return convertToResponse(mark);
     }
 
-    public MarkResponseTo update(MarkRequestTo markRequestTo) throws EntityNotFoundException{
-        markDao.findById(markRequestTo.getId()).orElseThrow(() -> new EntityNotFoundException("This mark doesn't exist."));
+    public MarkResponseTo update(MarkRequestTo markRequestTo) throws EntityNotFoundException, DuplicateFieldException {
+        markRepository.findById(markRequestTo.getId()).orElseThrow(() -> new EntityNotFoundException("This mark doesn't exist."));
+
+        markRepository.findByName(markRequestTo.getName())
+                .filter(mark -> mark.getId() != markRequestTo.getId())
+                .ifPresent(mark -> {
+                    throw new DuplicateFieldException("name", markRequestTo.getName());
+                });
 
         Mark updatedMark = convertToMark(markRequestTo);
-        markDao.save(updatedMark);
+        markRepository.save(updatedMark);
 
         return convertToResponse(updatedMark);
     }
 
     public void delete(long id) {
-        markDao.findById(id).orElseThrow(() -> new EntityNotFoundException("Mark doesn't exist."));
-        markDao.deleteById(id);
+        markRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Mark doesn't exist."));
+        markRepository.deleteById(id);
     }
 
     private Mark convertToMark(MarkRequestTo markRequestTo) {
         return this.modelMapper.map(markRequestTo, Mark.class);
     }
 
-    private MarkResponseTo convertToResponse(Mark mark) {
+    public MarkResponseTo convertToResponse(Mark mark) {
         return this.modelMapper.map(mark, MarkResponseTo.class);
     }
 }

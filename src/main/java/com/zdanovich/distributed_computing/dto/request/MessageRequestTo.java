@@ -1,5 +1,6 @@
 package com.zdanovich.distributed_computing.dto.request;
 
+import com.zdanovich.distributed_computing.model.Issue;
 import com.zdanovich.distributed_computing.validation.groups.OnCreateOrUpdate;
 import com.zdanovich.distributed_computing.validation.groups.OnPatch;
 import jakarta.validation.constraints.NotBlank;

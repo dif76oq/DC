@@ -2,6 +2,7 @@ package com.zdanovich.distributed_computing.controller;
 
 import com.zdanovich.distributed_computing.dto.request.MarkRequestTo;
 import com.zdanovich.distributed_computing.dto.response.MarkResponseTo;
+import com.zdanovich.distributed_computing.exception.DuplicateFieldException;
 import com.zdanovich.distributed_computing.exception.EntityNotFoundException;
 import com.zdanovich.distributed_computing.service.MarkService;
 import com.zdanovich.distributed_computing.validation.groups.OnCreateOrUpdate;
@@ -53,8 +54,12 @@ public class MarkController {
             );
             return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
         }
+        try {
+            return new ResponseEntity<>(markService.save(markRequestTo), HttpStatus.CREATED);
+        } catch (DuplicateFieldException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
 
-        return new ResponseEntity<>(markService.save(markRequestTo), HttpStatus.CREATED);
     }
 
     @PutMapping
@@ -73,7 +78,10 @@ public class MarkController {
             return new ResponseEntity<>(updatedMark, HttpStatus.OK);
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (DuplicateFieldException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
+
     }
 
 

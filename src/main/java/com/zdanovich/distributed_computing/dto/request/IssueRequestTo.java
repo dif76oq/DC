@@ -5,6 +5,9 @@ import com.zdanovich.distributed_computing.validation.groups.OnPatch;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class IssueRequestTo {
 
     private long id;
@@ -19,10 +22,10 @@ public class IssueRequestTo {
     @NotBlank(message="Content can't be empty", groups = OnCreateOrUpdate.class)
     private String content;
 
+    private Set<String> marks = new HashSet<>();
 
-    public long getWriterId() {
-        return writerId;
-    }
+
+    public long getWriterId() {return writerId;}
     public void setWriterId(long writerId) {
         this.writerId = writerId;
     }
@@ -49,5 +52,14 @@ public class IssueRequestTo {
     }
     public void setId(long id) {
         this.id = id;
+    }
+
+
+    public Set<String> getMarks() {
+        return marks;
+    }
+
+    public void setMarks(Set<String> marks) {
+        this.marks = marks;
     }
 }

@@ -1,10 +1,20 @@
 package com.zdanovich.distributed_computing.model;
 
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name="tbl_message")
 public class Message {
 
+    @Id()
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    private long issueId;
+
+    @ManyToOne
+    @JoinColumn(name = "issue_id")
+    private Issue issue;
+
     private String content;
 
 
@@ -16,11 +26,11 @@ public class Message {
     }
 
 
-    public long getIssueId() {
-        return issueId;
+    public Issue getIssue() {
+        return issue;
     }
-    public void setIssueId(long issueId) {
-        this.issueId = issueId;
+    public void setIssue(Issue issue) {
+        this.issue = issue;
     }
 
 

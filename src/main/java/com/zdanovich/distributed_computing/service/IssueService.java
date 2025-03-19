@@ -1,93 +1,143 @@
 package com.zdanovich.distributed_computing.service;
 
-import com.zdanovich.distributed_computing.dao.InMemoryIssueDao;
 import com.zdanovich.distributed_computing.dto.request.IssueRequestTo;
 import com.zdanovich.distributed_computing.dto.response.IssueResponseTo;
+import com.zdanovich.distributed_computing.dto.response.MarkResponseTo;
+import com.zdanovich.distributed_computing.exception.DuplicateFieldException;
 import com.zdanovich.distributed_computing.exception.EntityNotFoundException;
 import com.zdanovich.distributed_computing.model.Issue;
+import com.zdanovich.distributed_computing.model.Mark;
+import com.zdanovich.distributed_computing.model.Writer;
+import com.zdanovich.distributed_computing.repository.IssueRepository;
+import com.zdanovich.distributed_computing.repository.MarkRepository;
+import com.zdanovich.distributed_computing.repository.WriterRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class IssueService {
 
     private final ModelMapper modelMapper;
-    private final InMemoryIssueDao issueDao;
+    private final IssueRepository issueRepository;
+    private final WriterRepository writerRepository;
+    private final MarkRepository markRepository;
 
     @Autowired
-    public IssueService(ModelMapper modelMapper, InMemoryIssueDao issueDao) {
+    public IssueService(ModelMapper modelMapper, IssueRepository issueRepository, WriterRepository writerRepository, MarkRepository markRepository) {
         this.modelMapper = modelMapper;
-        this.issueDao = issueDao;
+        this.issueRepository = issueRepository;
+        this.writerRepository = writerRepository;
+        this.markRepository = markRepository;
     }
 
     public List<IssueResponseTo> findAll() {
-        return issueDao.findAll()
-                .stream()
-                .map(this::convertToResponse)
-                .collect(Collectors.toList());
+        List<Issue> issues = issueRepository.findAll();
+        return issues.stream().map(this::convertToResponse).collect(Collectors.toList());
     }
 
     public IssueResponseTo findById(long id) throws EntityNotFoundException {
-        Issue issue = issueDao.findById(id).orElseThrow(() -> new EntityNotFoundException("This issue doesn't exist."));
+        Issue issue = issueRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("This issue doesn't exist."));
         return convertToResponse(issue);
     }
-    
 
-    public IssueResponseTo save(IssueRequestTo issueRequestTo) {
+//    public List<MarkResponseTo> findMarksByIssueId(long id) {
+//        return findById(id).getMarks().stream()
+//                .map(mark -> markService.convertToResponse(mark))
+//                .collect(Collectors.toList());
+//    }
+
+
+
+    public IssueResponseTo save(IssueRequestTo issueRequestTo) throws DuplicateFieldException, EntityNotFoundException {
+
+        if (issueRepository.findByTitle(issueRequestTo.getTitle()).isPresent()) {
+            throw new DuplicateFieldException("title", issueRequestTo.getTitle());
+        }
+
         Issue issue = convertToIssue(issueRequestTo);
         issue.setCreated(new Date());
         issue.setModified(issue.getCreated());
-        issueDao.save(issue);
+        issue = issueRepository.save(issue);
+
         return convertToResponse(issue);
     }
 
     public IssueResponseTo update(IssueRequestTo issueRequestTo) throws EntityNotFoundException{
-        Issue existingIssue = issueDao.findById(issueRequestTo.getId()).orElseThrow(() -> new EntityNotFoundException("This issue doesn't exist."));
+        Issue existingIssue = issueRepository.findById(issueRequestTo.getId()).orElseThrow(() -> new EntityNotFoundException("This issue doesn't exist."));
+
+
+        issueRepository.findByTitle(issueRequestTo.getTitle())
+                .filter(issue -> issue.getId() != issueRequestTo.getId())
+                .ifPresent(issue -> {
+                    throw new DuplicateFieldException("title", issueRequestTo.getTitle());
+                });
 
         Issue updatedIssue = convertToIssue(issueRequestTo);
         updatedIssue.setId(issueRequestTo.getId());
         updatedIssue.setCreated(existingIssue.getCreated());
         updatedIssue.setModified(new Date());
 
-        issueDao.save(updatedIssue);
+        issueRepository.save(updatedIssue);
 
         return convertToResponse(updatedIssue);
     }
 
     public IssueResponseTo partialUpdate(IssueRequestTo issueRequestTo) throws EntityNotFoundException{
-        Issue issue = issueDao.findById(issueRequestTo.getId()).orElseThrow(() -> new EntityNotFoundException("This issue doesn't exist."));
+        Issue issue = issueRepository.findById(issueRequestTo.getId()).orElseThrow(() -> new EntityNotFoundException("This issue doesn't exist."));
+
+        if (issueRequestTo.getTitle() != null && !issueRequestTo.getTitle().equals(issue.getTitle())) {
+            if (issueRepository.findByTitle(issueRequestTo.getTitle()).isPresent()) {
+                throw new DuplicateFieldException("title", issueRequestTo.getTitle());
+            }
+            issue.setTitle(issueRequestTo.getTitle());
+        }
 
         if (issueRequestTo.getContent() != null) {
             issue.setContent(issueRequestTo.getContent());
         }
-        if (issueRequestTo.getTitle() != null) {
-            issue.setTitle(issueRequestTo.getTitle());
-        }
+
         if (issueRequestTo.getWriterId() != 0) {
-            issue.setWriterId(issueRequestTo.getWriterId());
+            Writer writer = writerRepository.findById(issueRequestTo.getWriterId()).get();
+            issue.setWriter(writer);
         }
 
         issue.setModified(new Date());
-        issueDao.save(issue);
+        issueRepository.save(issue);
 
         return convertToResponse(issue);
     }
 
     public void delete(long id) throws EntityNotFoundException {
-        issueDao.findById(id).orElseThrow(() -> new EntityNotFoundException("Issue doesn't exist."));
-        issueDao.deleteById(id);
+        issueRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Issue doesn't exist."));
+        issueRepository.deleteById(id);
     }
 
-    private Issue convertToIssue(IssueRequestTo issueRequestTo) {
-        return this.modelMapper.map(issueRequestTo, Issue.class);
+    private Issue convertToIssue(IssueRequestTo issueRequestTo) throws EntityNotFoundException {
+        Issue issue = modelMapper.map(issueRequestTo, Issue.class);
+
+        if (issueRequestTo.getWriterId() != 0) {
+            Writer writer = writerRepository.findById(issueRequestTo.getWriterId())
+                    .orElseThrow(() -> new EntityNotFoundException("Writer not found with id: " + issueRequestTo.getWriterId()));
+            issue.setWriter(writer);
+        }
+
+        if (issueRequestTo.getMarks() != null && !issueRequestTo.getMarks().isEmpty()) {
+            Set<Mark> marks = issueRequestTo.getMarks().stream()
+                    .map(name -> markRepository.findByName(name)
+                            .orElseGet(() -> new Mark(name)))
+                    .collect(Collectors.toSet());
+
+            issue.setMarks(marks);
+        }
+
+        return issue;
     }
 
-    private IssueResponseTo convertToResponse(Issue issue) {
+    public IssueResponseTo convertToResponse(Issue issue) {
         return this.modelMapper.map(issue, IssueResponseTo.class);
     }
 }

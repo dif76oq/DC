@@ -2,7 +2,9 @@ package com.zdanovich.distributed_computing.controller;
 
 import com.zdanovich.distributed_computing.dto.request.IssueRequestTo;
 import com.zdanovich.distributed_computing.dto.response.IssueResponseTo;
+import com.zdanovich.distributed_computing.dto.response.MarkResponseTo;
 import com.zdanovich.distributed_computing.dto.response.MessageResponseTo;
+import com.zdanovich.distributed_computing.exception.DuplicateFieldException;
 import com.zdanovich.distributed_computing.exception.EntityNotFoundException;
 import com.zdanovich.distributed_computing.service.IssueService;
 import com.zdanovich.distributed_computing.service.MessageService;
@@ -55,6 +57,11 @@ public class IssueController {
         return new ResponseEntity<>(messages, HttpStatus.OK);
     }
 
+//    @GetMapping("/{id}/marks")
+//    public ResponseEntity<?> findMarksByIssueId(@PathVariable long id) {
+//        return new ResponseEntity<>(issueService.findMarksByIssueId(id), HttpStatus.OK);
+//    }
+
     @PostMapping
     public ResponseEntity<?> save(@RequestBody @Validated(OnCreateOrUpdate.class) IssueRequestTo issueRequestTo, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
@@ -64,8 +71,13 @@ public class IssueController {
             );
             return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
         }
-
-        return new ResponseEntity<>(issueService.save(issueRequestTo), HttpStatus.CREATED);
+        try {
+            return new ResponseEntity<>(issueService.save(issueRequestTo), HttpStatus.CREATED);
+        } catch (DuplicateFieldException e) {
+            return new ResponseEntity<>("{}", HttpStatus.FORBIDDEN);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>("{}", HttpStatus.NOT_FOUND);
+        }
     }
 
     @PutMapping

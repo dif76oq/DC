@@ -1,20 +1,19 @@
 package com.zdanovich.distributed_computing.dto.response;
 
+import com.zdanovich.distributed_computing.model.Mark;
+
 import java.util.Date;
+import java.util.Set;
 
 public class IssueResponseTo {
 
     private long id;
-
     private long writerId;
-
     private String title;
-
     private String content;
-
     private Date created;
-
     private Date modified;
+    private Set<String> marks;
 
     public long getWriterId() {
         return writerId;
@@ -61,5 +60,13 @@ public class IssueResponseTo {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public Set<String> getMarks() {
+        return marks;
+    }
+
+    public void setMarks(Set<String> marks) {
+        this.marks = marks;
     }
 }
