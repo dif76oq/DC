@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.zdanovich</groupId>
-	<artifactId>distributed_computing</artifactId>
+	<artifactId>module-publisher</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>distributed_computing</name>
+	<name>module-publisher</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
 	<licenses>
@@ -27,7 +27,7 @@
 		<url/>
 	</scm>
 	<properties>
-		<java.version>23</java.version>
+		<java.version>21</java.version>
 	</properties>
 	<dependencies>
 		<dependency>
